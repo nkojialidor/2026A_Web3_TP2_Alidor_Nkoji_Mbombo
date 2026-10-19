@@ -29,10 +29,16 @@ private films: { title: string; planets: string[] }[] = [];
 private planetes: string[] = [];
 @state()
 private indexPlanete: number = 0;
+private _interval?: number;
 
 connectedCallback() {
 super.connectedCallback();
 this.chargerFilms();
+}
+
+disconnectedCallback() {
+  super.disconnectedCallback();
+  this.arreterDefilement();
 }
 
 async chargerFilms() {
@@ -45,17 +51,21 @@ this.films = donnees.results;
 async choisirFilm(film: { title: string; planets: string[] }) {
 console.log("Film choisi :", film.title);
 console.log("Planètes du film :", film.planets);
+this.arreterDefilement();
 this.indexPlanete = 0;
 this.planetes = [];
 
 for (const adresse of film.planets) {
 const reponse = await fetch(adresse);
 const planete = await reponse.json();
-
 this.planetes = [...this.planetes, planete.name];
 console.log("Nom de la planète :", planete.name);
 }
+this.demarrerDefilement();
+}
 
+arreterDefilement() {
+  clearInterval(this._interval);
 }
 
 obtenirImagePlanete(nom: string): string {
@@ -106,6 +116,12 @@ planetePrecedente() {
   }
 }
 
+demarrerDefilement() {
+  this._interval = window.setInterval(() => {
+    this.planeteSuivante();
+  }, 1000);
+}
+
 render() {
     return html`
     <h2>Liste des films Star Wars Avec Alidor</h2>
@@ -148,12 +164,16 @@ render() {
     
     }
     <button @click=${this.planetePrecedente}>
-  Précédent
-</button>
+    Précédent
+    </button>
 
-<button @click=${this.planeteSuivante}>
-  Suivant
-</button>
+    <button @click=${this.planeteSuivante}>
+    Suivant
+    </button>
+
+    <button @click=${this.arreterDefilement}>
+    Arrêter
+    </button>
     `;
 }
 }
