@@ -45,7 +45,7 @@ this.films = donnees.results;
 async choisirFilm(film: { title: string; planets: string[] }) {
 console.log("Film choisi :", film.title);
 console.log("Planètes du film :", film.planets);
-
+this.indexPlanete = 0;
 this.planetes = [];
 
 for (const adresse of film.planets) {
@@ -53,9 +53,9 @@ const reponse = await fetch(adresse);
 const planete = await reponse.json();
 
 this.planetes = [...this.planetes, planete.name];
-
 console.log("Nom de la planète :", planete.name);
 }
+
 }
 
 obtenirImagePlanete(nom: string): string {
@@ -88,6 +88,22 @@ obtenirImagePlanete(nom: string): string {
   }
 
   return "";
+}
+
+planeteSuivante() {
+  if (this.indexPlanete < this.planetes.length - 1) {
+    this.indexPlanete++;
+  } else {
+    this.indexPlanete = 0;
+  }
+}
+
+planetePrecedente() {
+  if (this.indexPlanete > 0) {
+    this.indexPlanete--;
+  } else {
+    this.indexPlanete = this.planetes.length - 1;
+  }
 }
 
 render() {
@@ -129,7 +145,15 @@ render() {
         </div>
         `
     : html`<p>Aucune planète sélectionnée</p>`
+    
     }
+    <button @click=${this.planetePrecedente}>
+  Précédent
+</button>
+
+<button @click=${this.planeteSuivante}>
+  Suivant
+</button>
     `;
 }
 }
