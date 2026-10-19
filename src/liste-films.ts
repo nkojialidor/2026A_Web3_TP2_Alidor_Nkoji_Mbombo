@@ -1,13 +1,34 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 @customElement('liste-films')
 export class ListeFilms extends LitElement {
+static styles = css`
+  .image-planete {
+    position: relative;
+    width: 300px;
+  }
+
+  .image-planete img {
+    width: 100%;
+  }
+
+  .nom-planete {
+    position: absolute;
+    bottom: 10px;
+    left: 8px;
+    color: white;
+    background-color: black;
+    padding: 5px;
+  }
+`;
 
 @state()
 private films: { title: string; planets: string[] }[] = [];
 @state()
 private planetes: string[] = [];
+@state()
+private indexPlanete: number = 0;
 
 connectedCallback() {
 super.connectedCallback();
@@ -37,6 +58,38 @@ console.log("Nom de la planète :", planete.name);
 }
 }
 
+obtenirImagePlanete(nom: string): string {
+  if (nom === "Tatooine") {
+    return "/planetes/images/tatooine.jpeg";
+  }
+
+  if (nom === "Alderaan") {
+    return "/planetes/images/alderaan.jpeg";
+  }
+
+  if (nom === "Yavin IV") {
+    return "/planetes/images/yavin4.jpg";
+  }
+
+  if (nom === "Coruscant") {
+    return "/planetes/images/coruscant.jpg";
+  }
+
+  if (nom === "Dagobah") {
+    return "/planetes/images/dagobah.jpg";
+  }
+
+  if (nom === "Endor") {
+    return "/planetes/images/endor.jpg";
+  }
+
+  if (nom === "Naboo") {
+    return "/planetes/images/naboo.jpeg";
+  }
+
+  return "";
+}
+
 render() {
     return html`
     <h2>Liste des films Star Wars Avec Alidor</h2>
@@ -53,11 +106,30 @@ render() {
 
     <h2>Planètes du film sélectionné</h2>
 
-    <ul>
-    ${this.planetes.map(planete => html`
-        <li>${planete}</li>
-    `)}
-    </ul>
+        ${this.planetes.length > 0
+    ? html`
+       <div class="image-planete">
+            ${this.obtenirImagePlanete(this.planetes[this.indexPlanete]) !== ""
+            ? html`
+                <img
+                    src=${this.obtenirImagePlanete(this.planetes[this.indexPlanete])}
+                    alt=${this.planetes[this.indexPlanete]}
+                    width="300"
+                >
+                `
+            : html`<p>Image non disponible</p>`
+            }
+            ${this.obtenirImagePlanete(this.planetes[this.indexPlanete]) !== ""? html`
+                <p class="nom-planete">${this.planetes[this.indexPlanete]}</p>
+                `
+            : html`
+                <p>${this.planetes[this.indexPlanete]}</p>
+                `
+            }
+        </div>
+        `
+    : html`<p>Aucune planète sélectionnée</p>`
+    }
     `;
 }
 }
