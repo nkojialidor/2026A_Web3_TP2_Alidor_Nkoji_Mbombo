@@ -116,6 +116,10 @@ planeteSuivante() {
   }
 }
 
+_tick() {
+  this.planeteSuivante();
+}
+
 planetePrecedente() {
   if (this.indexPlanete > 0) {
     this.indexPlanete--;
@@ -125,10 +129,7 @@ planetePrecedente() {
 }
 
 demarrerDefilement() {
-  this._interval = window.setInterval(() => {
-    this.planeteSuivante();
-  }, this.vitesse);
-
+  this._interval = window.setInterval(() => this._tick(), this.vitesse);
   this.defilementActif = true;
 }
 
