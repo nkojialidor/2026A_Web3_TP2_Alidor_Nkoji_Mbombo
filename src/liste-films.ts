@@ -30,7 +30,8 @@ private planetes: string[] = [];
 @state()
 private indexPlanete: number = 0;
 private _interval?: number;
-
+@state() private vitesse: number = 1000;
+@state() private defilementActif: boolean = false;
 connectedCallback() {
 super.connectedCallback();
 this.chargerFilms();
@@ -49,23 +50,30 @@ this.films = donnees.results;
 }
 
 async choisirFilm(film: { title: string; planets: string[] }) {
-console.log("Film choisi :", film.title);
-console.log("Planètes du film :", film.planets);
-this.arreterDefilement();
-this.indexPlanete = 0;
-this.planetes = [];
+  console.log("Film choisi :", film.title);
+  console.log("Planètes du film :", film.planets);
 
-for (const adresse of film.planets) {
-const reponse = await fetch(adresse);
-const planete = await reponse.json();
-this.planetes = [...this.planetes, planete.name];
-console.log("Nom de la planète :", planete.name);
-}
-this.demarrerDefilement();
+  this.arreterDefilement();
+  this.indexPlanete = 0;
+  this.planetes = [];
+
+  for (const adresse of film.planets) {
+    const reponse = await fetch(adresse);
+    const planete = await reponse.json();
+
+    this.planetes = [...this.planetes, planete.name];
+
+    console.log("Nom de la planète :", planete.name);
+  }
+
+  window.setTimeout(() => {this.planeteSuivante();
+    this.demarrerDefilement();
+  }, 1000);
 }
 
 arreterDefilement() {
   clearInterval(this._interval);
+  this.defilementActif = false;
 }
 
 obtenirImagePlanete(nom: string): string {
@@ -119,7 +127,37 @@ planetePrecedente() {
 demarrerDefilement() {
   this._interval = window.setInterval(() => {
     this.planeteSuivante();
-  }, 1000);
+  }, this.vitesse);
+
+  this.defilementActif = true;
+}
+
+changerVitesse(evenement: Event) {
+  const liste = evenement.target as HTMLSelectElement;
+  this.vitesse = Number(liste.value);
+
+  if (this.defilementActif) {
+    this.arreterDefilement();
+    this.demarrerDefilement();
+  }
+}
+
+cliquerSuivant() {
+  this.planeteSuivante();
+
+  if (this.defilementActif) {
+    this.arreterDefilement();
+    this.demarrerDefilement();
+  }
+}
+
+cliquerPrecedent() {
+  this.planetePrecedente();
+
+  if (this.defilementActif) {
+    this.arreterDefilement();
+    this.demarrerDefilement();
+  }
 }
 
 render() {
@@ -163,16 +201,30 @@ render() {
     : html`<p>Aucune planète sélectionnée</p>`
     
     }
-    <button @click=${this.planetePrecedente}>
-    Précédent
+
+    <label for="vitesse">Vitesse :</label>
+    <select id="vitesse" @change=${this.changerVitesse}>
+        <option value="1500">Lent</option>
+        <option value="1000" selected>Moyen</option>
+        <option value="500">Rapide</option>
+    </select>
+
+    <button @click=${this.cliquerPrecedent}>
+        Précédent
     </button>
 
-    <button @click=${this.planeteSuivante}>
-    Suivant
+    <button @click=${this.cliquerSuivant}>
+        Suivant
     </button>
 
-    <button @click=${this.arreterDefilement}>
-    Arrêter
+    <button @click=${() => {
+        if (this.defilementActif) {
+            this.arreterDefilement();
+        } else {
+            this.demarrerDefilement();
+        }
+        }}>
+        ${this.defilementActif ? 'Arrêter' : 'Activer'}
     </button>
     `;
 }
