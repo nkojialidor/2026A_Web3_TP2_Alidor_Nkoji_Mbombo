@@ -22,3 +22,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
+body {
+  display: block;
+}
